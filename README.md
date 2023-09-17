@@ -65,9 +65,7 @@ A tool to download light novels from [ln.hako.vn](https://ln.hako.vn) in epub fi
 <!-- GETTING STARTED -->
 ## Getting Started
 
-For normal user, download the execution file below. Run and follow the instructions.
-
-**Windows**: [hako2epub.exe ~ 14MB](https://rebrand.ly/hako2epub)
+[TUTORIAL](https://www.youtube.com/watch?v=4c1ocwYiBSs)
 
 ### Prerequisites
 
