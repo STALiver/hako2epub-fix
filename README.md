@@ -121,9 +121,6 @@ python hako2epub.py -u light_novel_url
 * If you update the volume which contains specific chapters, only new chapters after the current latest chapter will be added.
 * Try to keep the program and `ln_info.json` file at the same folder with your downloaded light novels for efficiently management.
 
-## Screenshots
-![Demo](images/demo.png)
-
 <!-- ISSUES -->
 ## Issues
 
