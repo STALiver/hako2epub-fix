@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from ebooklib import epub
 from PIL import Image
 
-SLEEPTIME = 120
+SLEEPTIME = 30
 LINE_SIZE = 80
 THREAD_NUM = 8
 HEADERS = {
@@ -34,10 +34,12 @@ def check_available_request(url, steam = False):
     if any(substr in url for substr in ['ln.hako.vn', 'docln.net']):
         while status_code not in range(200,299):
                 if status_code not in range(200,299):
-                    time.sleep(SLEEPTIME)
-                    request = ln_request.get(url, stream=steam, headers=HEADERS)
-                    status_code = request.status_code
-        
+                    #print(f'\n[{status_code}] {url} ')
+                    if status_code == 404: break               
+                    else:
+                        time.sleep(SLEEPTIME)
+                        request = ln_request.get(url, stream=steam, headers=HEADERS)
+                        status_code = request.status_code
     return request
 
 
@@ -100,8 +102,10 @@ class Utils():
         return name
 
     def get_image(self, image_url):
+
         if 'imgur.com' in image_url and '.' not in image_url[-5:]:
             image_url += '.jpg'
+    
         try:
             
             request = check_available_request(image_url, steam=True)
@@ -489,7 +493,7 @@ class EpubEngine():
 
     def make_image(self, chapter_content, chapter_id):
         chapter_content.find('div',class_='flex').decompose()
-        for a in chapter_content.find_all('a',{'target':'__blank'}): a.decompose()
+        for a in chapter_content.find_all('p',{'target':'__blank'}): a.decompose()
         img_tags = chapter_content.findAll('img')
         img_urls = []
         content = str(chapter_content)
@@ -498,25 +502,26 @@ class EpubEngine():
                 img_urls.append(img_tag.get('src'))
 
             for i, img_url in enumerate(img_urls):
-                try:
-                    img = Utils().get_image(img_url)
-                    b = BytesIO()
-                    img.save(b, 'jpeg')
-                    b_img = b.getvalue()
+                if "chapter-banners" not in img_url:
+                    try:
+                        img = Utils().get_image(img_url)
+                        b = BytesIO()
+                        img.save(b, 'jpeg')
+                        b_img = b.getvalue()
 
-                    img_path = 'images/chapter_' + \
-                        str(chapter_id) + '/image_' + str(i) + '.jpeg'
-                    image_item = epub.EpubItem(
-                        file_name=img_path, media_type='image/jpeg', content=b_img)
+                        img_path = 'images/chapter_' + \
+                            str(chapter_id) + '/image_' + str(i) + '.jpeg'
+                        image_item = epub.EpubItem(
+                            file_name=img_path, media_type='image/jpeg', content=b_img)
 
-                    self.book.add_item(image_item)
+                        self.book.add_item(image_item)
 
-                    img_old_path = 'src="' + img_url
-                    img_new_path = 'style="display: block;margin-left: auto;margin-right: auto;" src="' + img_path
-                    content = content.replace(img_old_path, img_new_path)
-                except:
-                    print('Error: Can not get chapter images! ' + img_url)
-                    print('--------------------')
+                        img_old_path = 'src="' + img_url
+                        img_new_path = 'style="display: block;margin-left: auto;margin-right: auto;" src="' + img_path
+                        content = content.replace(img_old_path, img_new_path)
+                    except:
+                        print(f'Error: Can not get chapter images! {chapter_id}')
+                        print('--------------------')
         return content
 
     def get_chapter_content_note(self, soup):
