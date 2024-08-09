@@ -492,7 +492,7 @@ class EpubEngine():
             print('--------------------')
 
     def make_image(self, chapter_content, chapter_id):
-        chapter_content.find('div',class_='flex').decompose()
+        chapter_content.find('div',class_='flex')
         for a in chapter_content.find_all('p',{'target':'__blank'}): a.decompose()
         img_tags = chapter_content.findAll('img')
         img_urls = []
