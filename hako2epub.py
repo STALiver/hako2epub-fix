@@ -24,7 +24,8 @@ for domain in DOMAINC:
 
 print(DOMAINC)
 if DOMAINC is None:
-    print("Không tìm thấy tên miền phù hợp, hay thêm tên miền mới vào biến tên DOMANIC")
+    pass
+    #print("Không tìm thấy tên miền phù hợp, hay thêm tên miền mới vào biến tên DOMANIC")
 
 SLEEPTIME = 30
 LINE_SIZE = 80
