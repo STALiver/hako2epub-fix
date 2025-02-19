@@ -14,24 +14,37 @@ from bs4 import BeautifulSoup
 from ebooklib import epub
 from PIL import Image
 
+DOMAINC = ['ln.hako.vn','docln.sbs']
+#Kiểm tra tên miền web có vào được hay không
+for domain in DOMAINC:
+    try:
+        r = requests.get(url="https://"+domain, timeout=5)
+    except requests.exceptions.Timeout:
+        DOMAINC.remove(domain)
+
+print(DOMAINC)
+if DOMAINC is None:
+    print("Không tìm thấy tên miền phù hợp, hay thêm tên miền mới vào biến tên DOMANIC")
+
 SLEEPTIME = 30
 LINE_SIZE = 80
 THREAD_NUM = 8
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.97 Safari/537.36',
-    'Referer': 'https://ln.hako.vn/'
+    'Referer': 'https://' + DOMAINC[0]
 }
 
-tool_version = '2.0.5'
+
+tool_version = '2.0.6'
 bs4_html_parser = 'html.parser'
 ln_request = requests.Session()
 
 def check_available_request(url, steam = False):
-    
+    if "https://" not in url: url = "https://" + url
     request = ln_request.get(url, stream=steam, headers=HEADERS)
     status_code = request.status_code
 
-    if any(substr in url for substr in ['ln.hako.vn', 'docln.net']):
+    if any(substr in url for substr in DOMAINC):
         while status_code not in range(200,299):
                 if status_code not in range(200,299):
                     #print(f'\n[{status_code}] {url} ')
@@ -82,12 +95,14 @@ class pcolors:
 class Utils():
 
     def re_url(self, ln_url, url):
-        new_url = ''
-        if 'ln.hako.vn/truyen/' in ln_url:
-            new_url = 'https://ln.hako.vn' + url
-        else:
-            new_url = 'https://docln.net' + url
+        if "/truyen/" in ln_url:
+            new_url = DOMAINC[0] + url
         return new_url
+        #if 'ln.hako.vn/truyen/' in ln_url:
+        #    new_url = 'https://ln.hako.vn' + url
+        #else:
+        #    new_url = 'https://docln.net' + url
+        #return new_url
 
     def format_text(self, text):
         return text.strip().replace('\n', '')
@@ -840,7 +855,7 @@ class Engine():
             print('--------------------')
 
     def check_valid_url(self, url):
-        if not any(substr in url for substr in ['ln.hako.vn/truyen/', 'docln.net/truyen/']):
+        if not any(substr in url for substr in DOMAINC):
             print('Invalid url. Please try again.')
             return False
         else:
