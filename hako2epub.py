@@ -19,10 +19,9 @@ DOMAINC = ['ln.hako.vn','docln.sbs']
 for domain in DOMAINC:
     try:
         r = requests.get(url="https://"+domain, timeout=5)
-    except requests.exceptions.Timeout:
+    except:
         DOMAINC.remove(domain)
 
-print(DOMAINC)
 if DOMAINC is None:
     pass
     #print("Không tìm thấy tên miền phù hợp, hay thêm tên miền mới vào biến tên DOMANIC")
@@ -36,7 +35,7 @@ HEADERS = {
 }
 
 
-tool_version = '2.0.6'
+tool_version = '2.0.7'
 bs4_html_parser = 'html.parser'
 ln_request = requests.Session()
 
@@ -96,8 +95,9 @@ class pcolors:
 class Utils():
 
     def re_url(self, ln_url, url):
-        if "/truyen/" in ln_url:
-            new_url = DOMAINC[0] + url
+        
+        # if "/truyen/" in ln_url:
+        new_url = DOMAINC[0] + url
         return new_url
         #if 'ln.hako.vn/truyen/' in ln_url:
         #    new_url = 'https://ln.hako.vn' + url
@@ -510,7 +510,7 @@ class EpubEngine():
     def make_image(self, chapter_content, chapter_id):
         chapter_content.find('div',class_='flex')
         for a in chapter_content.find_all('p',{'target':'__blank'}): a.decompose()
-        img_tags = chapter_content.findAll('img')
+        img_tags = chapter_content.find_all('img')
         img_urls = []
         content = str(chapter_content)
         if img_tags:
@@ -542,7 +542,7 @@ class EpubEngine():
 
     def get_chapter_content_note(self, soup):
         note_list = {}
-        note_div_list = soup.findAll('div', id=re.compile("^note"))
+        note_div_list = soup.find_all('div', id=re.compile("^note"))
         for div in note_div_list:
             note_tag = '[' + div.get('id') + ']'
             note_content = div.find('span', class_='note-content_real').text
@@ -663,15 +663,16 @@ class Volume():
             'span', 'volume-name').find('a').text).replace(':', '')
 
     def set_volume_cover_image(self):
+        # Lỗi vì có 2 thẻ div class="img-in-ratio" nên phải lấy thẻ đầu tiên
         self.cover_img = self.soup.find(
             'div', 'series-cover').find('div', 'img-in-ratio').get('style')[23:-2]
 
     def set_volume_num_chapter(self):
-        chapter_list = self.soup.find('ul', 'list-chapters').findAll('li')
+        chapter_list = self.soup.find('ul', 'list-chapters').find_all('li')
         self.num_chapter = len(chapter_list)
 
     def set_volume_chapter_list(self):
-        chapter_list = self.soup.find('ul', 'list-chapters').findAll('li')
+        chapter_list = self.soup.find('ul', 'list-chapters').find_all('li')
         for chapter in chapter_list:
             chapter_name = Utils().format_text(chapter.find('a').text)
             chapter_url = Utils().re_url(self.url, chapter.find('a').get('href'))
@@ -721,17 +722,17 @@ class LNInfo():
 
     def set_ln_series_info(self, soup):
         series_infomation = soup.find('div', 'series-information')
-        for a in soup.findAll('a'):
+        for a in soup.find_all('a'):
             try:
                 del a[':href']
             except: pass
         self.series_info = str(series_infomation)
-        author_div = series_infomation.findAll('div', 'info-item')[0].find('a')
+        author_div = series_infomation.find_all('div', 'info-item')[0].find('a')
         if author_div:
-            self.author = Utils().format_text(series_infomation.findAll(
+            self.author = Utils().format_text(series_infomation.find_all(
                 'div', 'info-item')[0].find('a').text)
         else:
-            self.author = Utils().format_text(series_infomation.findAll(
+            self.author = Utils().format_text(series_infomation.find_all(
                 'div', 'info-item')[1].find('a').text)
 
     def set_ln_summary(self, soup):
@@ -743,7 +744,7 @@ class LNInfo():
 
     def set_ln_volume(self, soup, mode=''):
 
-        get_volume_section = soup.findAll('section', 'volume-list')
+        get_volume_section = soup.find_all('section', 'volume-list')
         self.num_vol = len(get_volume_section)
 
         volume_titles = []
@@ -877,8 +878,8 @@ class Engine():
                     else:
                         self.current_ln.get_ln(ln_url, soup, mode)
                 except Exception:
-                    print('Error: Can not check light novel url!')
-                    print('--------------------')
+                     print('Error: Can not check light novel url!')
+                     print('--------------------')
         elif mode == 'update_all':
             UpdateLN().check_update()
 
@@ -888,7 +889,8 @@ if __name__ == '__main__':
         description='A tool to download light novels from https://ln.hako.vn in epub file format for offline reading.')
     parser.add_argument('-v', '--version', action='version',
                         version='hako2epub v%s' % tool_version)
-    parser.add_argument('ln_url', type=str, nargs='?', default='',
+    parser.add_argument('ln_url', type=str, nargs='?', 
+                        default='https://docln.sbs/sang-tac/22948-vo-tan-khai-huyen-ban-truong-ca-cua-gio',
                         help='url to the light novel page')
     parser.add_argument('-c', '--chapter', type=str, metavar='ln_url',
                         help='download specific chapters of a light novel')
