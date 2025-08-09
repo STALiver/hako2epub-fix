@@ -890,7 +890,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version', action='version',
                         version='hako2epub v%s' % tool_version)
     parser.add_argument('ln_url', type=str, nargs='?', 
-                        default='https://docln.sbs/sang-tac/22948-vo-tan-khai-huyen-ban-truong-ca-cua-gio',
+                        default='',
                         help='url to the light novel page')
     parser.add_argument('-c', '--chapter', type=str, metavar='ln_url',
                         help='download specific chapters of a light novel')
